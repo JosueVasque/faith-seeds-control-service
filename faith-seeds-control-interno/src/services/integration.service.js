@@ -6,21 +6,16 @@ let tokenExpiry = null
 // ─── Autenticación con el inventory-service ───────────────────────────────────
 
 const getAuthToken = async () => {
-  // Si el token aún es válido lo reutilizamos
   if (cachedToken && tokenExpiry && Date.now() < tokenExpiry) {
     return cachedToken
   }
-
   try {
     const res = await axios.post(`${process.env.INVENTORY_URL}/auth/login`, {
       email: process.env.INVENTORY_EMAIL,
       password: process.env.INVENTORY_PASSWORD,
     })
-
     cachedToken = res.data.data.token
-    // Expira en 23 horas para renovar antes de que el JWT expire
     tokenExpiry = Date.now() + 23 * 60 * 60 * 1000
-
     console.log('✅ Token de inventory-service obtenido.')
     return cachedToken
   } catch (error) {
@@ -30,6 +25,9 @@ const getAuthToken = async () => {
 }
 
 // ─── Sincronizar beneficiario con inventory-service ──────────────────────────
+// El inventory-service usa external_ref como referencia al código FSF.
+// Si ya existe por external_ref, el repository lo actualiza automáticamente.
+// Si no existe, lo crea con el external_ref.
 
 const sendBeneficiaryToWebhook = async beneficiary => {
   if (!process.env.INVENTORY_URL) {
@@ -41,39 +39,26 @@ const sendBeneficiaryToWebhook = async beneficiary => {
     const token = await getAuthToken()
     if (!token) return
 
+    const categoria = beneficiary.is_botadero ? 'botadero' : 'comunidad'
+
     const payload = {
-      code: beneficiary.code,
-      first_name: beneficiary.first_name,
-      last_name: beneficiary.last_name,
-      sector: beneficiary.sector,
-      status: beneficiary.status,
-      gender: beneficiary.gender,
-      age: beneficiary.age,
-      tutor_id: beneficiary.tutor_id,
-      school_id: beneficiary.school_id,
-      grade_id: beneficiary.grade_id,
+      nombres: beneficiary.first_name,
+      apellidos: beneficiary.last_name,
+      externalRef: beneficiary.code,
+      categoria,
     }
 
-    // Primero verificamos si ya existe en el inventory-service
-    try {
-      await axios.get(`${process.env.INVENTORY_URL}/beneficiaries/${beneficiary.code}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+    // El create del inventory-service ya maneja upsert por external_ref
+    await axios.post(`${process.env.INVENTORY_URL}/beneficiaries`, payload, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
 
-      // Si existe lo actualizamos
-      await axios.put(`${process.env.INVENTORY_URL}/beneficiaries/${beneficiary.code}`, payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      console.log(`🔄 Beneficiario actualizado en inventory-service: ${beneficiary.code}`)
-    } catch (notFound) {
-      // Si no existe lo creamos
-      await axios.post(`${process.env.INVENTORY_URL}/beneficiaries`, payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      console.log(`📤 Beneficiario creado en inventory-service: ${beneficiary.code}`)
-    }
+    console.log(`📤 Sincronizado con inventory-service: ${beneficiary.code}`)
   } catch (error) {
-    console.error(`❌ Error al sincronizar beneficiario ${beneficiary.code}:`, error.message)
+    console.error(
+      `❌ Error al sincronizar ${beneficiary.code}:`,
+      error.response?.data || error.message
+    )
   }
 }
 
