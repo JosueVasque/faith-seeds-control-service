@@ -47,7 +47,7 @@ const Layout = ({ children, title }) => {
   return (
     <div className="flex h-screen bg-slate-100 overflow-hidden">
       {/* Sidebar */}
-      <aside className="w-64 bg-slate-900 text-slate-100 flex flex-col shadow-xl flex-shrink-0">
+      <aside className="w-64 bg-slate-900 text-slate-100 flex flex-col shadow-xl shrink-0">
         <div className="px-6 py-6 border-b border-slate-700">
           <h2 className="text-lg font-semibold tracking-wide text-white">Faith Seeds</h2>
           <span className="text-xs text-slate-400 mt-1 block">Sistema de Control Interno</span>
@@ -88,7 +88,7 @@ const Layout = ({ children, title }) => {
 
       {/* Contenido principal */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between flex-shrink-0">
+        <header className="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between shrink-0">
           <h1 className="text-xl font-semibold text-slate-800">{title || 'Dashboard'}</h1>
           <div className="flex items-center gap-2 text-sm font-medium text-emerald-600">
             <Wifi size={15} />
