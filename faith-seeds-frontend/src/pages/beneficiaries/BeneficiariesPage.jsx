@@ -8,7 +8,7 @@ import {
 } from '../../services/beneficiary.service'
 import { getTutors } from '../../services/tutor.service'
 import { getSchools, getGrades } from '../../services/catalog.service'
-import { Pencil, Trash2 } from 'lucide-react'
+import { Pencil, Trash2, Search } from 'lucide-react'
 import api from '../../services/api'
 
 const emptyForm = {
@@ -45,6 +45,7 @@ const BeneficiariesPage = () => {
   const [manualCode, setManualCode] = useState(false)
   const [error, setError] = useState('')
   const [showForm, setShowForm] = useState(false)
+  const [search, setSearch] = useState('')
 
   const fetchAll = async () => {
     const [b, t, s, g] = await Promise.all([
@@ -81,7 +82,7 @@ const BeneficiariesPage = () => {
   const handleSubmit = async () => {
     if (!form.first_name.trim() || !form.last_name.trim())
       return setError('Nombres y apellidos son requeridos.')
-    if (!editingCode && !manualCode && !form.category) return setError('Seleccioná una categoría.')
+    if (!editingCode && !manualCode && !form.category) return setError('Selecciona una categoria.')
     setError('')
     try {
       const payload = { ...form }
@@ -126,7 +127,7 @@ const BeneficiariesPage = () => {
   }
 
   const handleDelete = async code => {
-    if (!confirm(`¿Eliminar beneficiario ${code}?`)) return
+    if (!confirm(`Eliminar beneficiario ${code}?`)) return
     await deleteBeneficiary(code)
     fetchAll()
   }
@@ -140,16 +141,31 @@ const BeneficiariesPage = () => {
     fetchPreview('C')
   }
 
+  const filtered = beneficiaries.filter(b =>
+    `${b.first_name} ${b.last_name} ${b.code}`.toLowerCase().includes(search.toLowerCase())
+  )
+
   const inputClass =
     'border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-slate-700 w-full'
 
   return (
     <Layout title="Beneficiarios">
-      {/* Header con botón */}
-      <div className="flex items-center justify-between mb-6">
-        <p className="text-sm text-slate-500">
-          {beneficiaries.length} beneficiario(s) registrado(s)
-        </p>
+      <div className="flex items-center justify-between mb-6 gap-4">
+        <div className="flex items-center gap-3 flex-1">
+          <p className="text-sm text-slate-500 whitespace-nowrap">
+            {filtered.length} beneficiario(s)
+          </p>
+          <div className="relative flex-1 max-w-sm">
+            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Buscar por nombre, apellido o codigo..."
+              className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-slate-700"
+            />
+          </div>
+        </div>
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
@@ -160,18 +176,16 @@ const BeneficiariesPage = () => {
         )}
       </div>
 
-      {/* Formulario */}
       {showForm && (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 mb-6">
           <h2 className="text-base font-semibold text-slate-700 mb-4">
             {editingCode ? `Editando: ${editingCode}` : 'Nuevo Beneficiario'}
           </h2>
           {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             {!editingCode && (
               <div>
-                <label className="text-xs font-medium text-slate-500 mb-1 block">Categoría</label>
+                <label className="text-xs font-medium text-slate-500 mb-1 block">Categoria</label>
                 <select
                   name="category"
                   value={form.category}
@@ -187,12 +201,13 @@ const BeneficiariesPage = () => {
                 </select>
               </div>
             )}
-
             <div>
               <label className="text-xs font-medium text-slate-500 mb-1 block">
-                Código{' '}
+                Codigo{' '}
                 {!editingCode && !manualCode && (
-                  <span className="text-blue-500 font-semibold ml-1">→ {previewCode}</span>
+                  <span className="text-blue-500 font-semibold ml-1">
+                    se asignara: {previewCode}
+                  </span>
                 )}
               </label>
               <div className="flex gap-2 items-center">
@@ -217,7 +232,6 @@ const BeneficiariesPage = () => {
                 )}
               </div>
             </div>
-
             <div>
               <label className="text-xs font-medium text-slate-500 mb-1 block">Nombres *</label>
               <input
@@ -239,17 +253,17 @@ const BeneficiariesPage = () => {
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-slate-500 mb-1 block">Teléfono</label>
+              <label className="text-xs font-medium text-slate-500 mb-1 block">Telefono</label>
               <input
                 name="phone"
                 value={form.phone}
                 onChange={handleChange}
-                placeholder="Teléfono"
+                placeholder="Telefono"
                 className={inputClass}
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-slate-500 mb-1 block">Condición</label>
+              <label className="text-xs font-medium text-slate-500 mb-1 block">Condicion</label>
               <input
                 name="status"
                 value={form.status}
@@ -259,7 +273,7 @@ const BeneficiariesPage = () => {
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-slate-500 mb-1 block">Género</label>
+              <label className="text-xs font-medium text-slate-500 mb-1 block">Genero</label>
               <select
                 name="gender"
                 value={form.gender}
@@ -344,7 +358,7 @@ const BeneficiariesPage = () => {
             </div>
             <div>
               <label className="text-xs font-medium text-slate-500 mb-1 block">
-                Día de Tutorías
+                Dia de Tutorias
               </label>
               <input
                 name="tutoring_day"
@@ -356,7 +370,7 @@ const BeneficiariesPage = () => {
             </div>
             <div>
               <label className="text-xs font-medium text-slate-500 mb-1 block">
-                Hora de Tutorías
+                Hora de Tutorias
               </label>
               <input
                 name="tutoring_hour"
@@ -367,7 +381,6 @@ const BeneficiariesPage = () => {
               />
             </div>
           </div>
-
           <div className="flex gap-2">
             <button
               onClick={handleSubmit}
@@ -385,16 +398,15 @@ const BeneficiariesPage = () => {
         </div>
       )}
 
-      {/* Tabla */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-slate-500 border-b border-slate-100 bg-slate-50">
-              <th className="px-6 py-3 font-medium">Código</th>
+              <th className="px-6 py-3 font-medium">Codigo</th>
               <th className="px-6 py-3 font-medium">Nombres</th>
               <th className="px-6 py-3 font-medium">Apellidos</th>
               <th className="px-6 py-3 font-medium">Sector</th>
-              <th className="px-6 py-3 font-medium">Condición</th>
+              <th className="px-6 py-3 font-medium">Condicion</th>
               <th className="px-6 py-3 font-medium">Tutor</th>
               <th className="px-6 py-3 font-medium">Colegio</th>
               <th className="px-6 py-3 font-medium">Grado</th>
@@ -402,24 +414,22 @@ const BeneficiariesPage = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {beneficiaries.map(b => (
+            {filtered.map(b => (
               <tr key={b.code} className="hover:bg-slate-50 transition">
                 <td className="px-6 py-3 font-mono text-slate-500">{b.code}</td>
                 <td className="px-6 py-3 text-slate-700">{b.first_name}</td>
                 <td className="px-6 py-3 text-slate-700">{b.last_name}</td>
                 <td className="px-6 py-3">
                   <span
-                    className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                      b.is_botadero ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'
-                    }`}
+                    className={`px-2 py-0.5 rounded-full text-xs font-semibold ${b.is_botadero ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}`}
                   >
                     {b.is_botadero ? 'Botadero' : 'Comunidad'}
                   </span>
                 </td>
-                <td className="px-6 py-3 text-slate-500">{b.status || '—'}</td>
-                <td className="px-6 py-3 text-slate-500">{b.tutor?.full_name || '—'}</td>
-                <td className="px-6 py-3 text-slate-500">{b.school?.name || '—'}</td>
-                <td className="px-6 py-3 text-slate-500">{b.grade?.name || '—'}</td>
+                <td className="px-6 py-3 text-slate-500">{b.status || '-'}</td>
+                <td className="px-6 py-3 text-slate-500">{b.tutor?.full_name || '-'}</td>
+                <td className="px-6 py-3 text-slate-500">{b.school?.name || '-'}</td>
+                <td className="px-6 py-3 text-slate-500">{b.grade?.name || '-'}</td>
                 <td className="px-6 py-3">
                   <div className="flex gap-3">
                     <button
@@ -438,10 +448,10 @@ const BeneficiariesPage = () => {
                 </td>
               </tr>
             ))}
-            {beneficiaries.length === 0 && (
+            {filtered.length === 0 && (
               <tr>
                 <td colSpan={9} className="px-6 py-8 text-center text-slate-400">
-                  Sin beneficiarios registrados.
+                  Sin resultados.
                 </td>
               </tr>
             )}
