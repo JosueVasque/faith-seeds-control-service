@@ -95,6 +95,7 @@ const processFamiliesSheet = async fileBuffer => {
           first_name: firstName,
           last_name: lastName,
           sector,
+          is_botadero: code.includes('-B'),
           tutor_id: tutor ? tutor.id : null,
           phone: lastTutorPhone || null,
         },
