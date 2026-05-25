@@ -43,7 +43,6 @@ const INVENTORY_URL = import.meta.env.VITE_INVENTORY_URL || 'http://localhost:51
 
 const Layout = ({ children, title }) => {
   const { pathname } = useLocation()
-
   return (
     <div className="flex h-screen bg-slate-100 overflow-hidden">
       <aside className="w-64 bg-slate-900 text-slate-100 flex flex-col shadow-xl shrink-0">
@@ -83,7 +82,6 @@ const Layout = ({ children, title }) => {
           <p className="text-xs text-slate-500 text-center">Faith Seeds © 2026</p>
         </div>
       </aside>
-
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between shrink-0">
           <h1 className="text-xl font-semibold text-slate-800">{title || 'Dashboard'}</h1>
@@ -94,14 +92,11 @@ const Layout = ({ children, title }) => {
         </header>
         <main className="flex-1 overflow-y-auto p-8">{children}</main>
       </div>
-
-      <a
-        href={INVENTORY_URL}
-        className="fixed bottom-6 right-6 flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white text-sm font-medium px-4 py-3 rounded-full shadow-lg transition z-50"
-      >
-        <ExternalLink size={15} />
-        Ir a Inventario
-      </a>
+      href={INVENTORY_URL}
+      className="fixed bottom-6 right-6 flex items-center gap-2 bg-slate-800 hover:bg-slate-700
+      text-white text-sm font-medium px-4 py-3 rounded-full shadow-lg transition z-50"
+      <ExternalLink size={15} />
+      Ir a Inventario
     </div>
   )
 }
