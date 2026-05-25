@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react'
 import Layout from '../../components/Layout'
 import { getBeneficiaries } from '../../services/beneficiary.service'
-import { Save } from 'lucide-react'
+import { Save, Search } from 'lucide-react'
 import api from '../../services/api'
 
 const DOCS = [
   { key: 'birth_certificate', label: 'Acta de Nacimiento' },
   { key: 'tutor_dpi', label: 'DPI Tutor' },
   { key: 'study_certificate', label: 'Constancia de Estudio' },
-  { key: 'photo', label: 'Fotografía' },
+  { key: 'photo', label: 'Fotografia' },
   { key: 'scholarship_agreement', label: 'Convenio de Beca' },
-  { key: 'image_authorization', label: 'Autorización de Imagen' },
+  { key: 'image_authorization', label: 'Autorizacion de Imagen' },
 ]
 
 const PaperworkPage = () => {
@@ -18,6 +18,7 @@ const PaperworkPage = () => {
   const [changes, setChanges] = useState({})
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [search, setSearch] = useState('')
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,10 +38,7 @@ const PaperworkPage = () => {
       beneficiaries.find(b => b.code === code),
       key
     )
-    setChanges(prev => ({
-      ...prev,
-      [code]: { ...prev[code], [key]: !current },
-    }))
+    setChanges(prev => ({ ...prev, [code]: { ...prev[code], [key]: !current } }))
   }
 
   const handleSaveAll = async () => {
@@ -63,10 +61,28 @@ const PaperworkPage = () => {
 
   const getTotal = b => DOCS.filter(d => getValue(b, d.key)).length
 
+  const filtered = beneficiaries.filter(b =>
+    `${b.first_name} ${b.last_name} ${b.code}`.toLowerCase().includes(search.toLowerCase())
+  )
+
   return (
-    <Layout title="Papelería">
-      <div className="flex items-center justify-between mb-6">
-        <p className="text-sm text-slate-500">{beneficiaries.length} beneficiario(s)</p>
+    <Layout title="Papeleria">
+      <div className="flex items-center justify-between mb-6 gap-4">
+        <div className="flex items-center gap-3 flex-1">
+          <p className="text-sm text-slate-500 whitespace-nowrap">
+            {filtered.length} beneficiario(s)
+          </p>
+          <div className="relative flex-1 max-w-sm">
+            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Buscar por nombre o codigo..."
+              className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-slate-700"
+            />
+          </div>
+        </div>
         <button
           onClick={handleSaveAll}
           disabled={saving || Object.keys(changes).length === 0}
@@ -85,7 +101,7 @@ const PaperworkPage = () => {
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-slate-500 border-b border-slate-100 bg-slate-50">
-              <th className="px-4 py-3 font-medium whitespace-nowrap">Código</th>
+              <th className="px-4 py-3 font-medium whitespace-nowrap">Codigo</th>
               <th className="px-4 py-3 font-medium whitespace-nowrap">Nombre</th>
               {DOCS.map(d => (
                 <th
@@ -99,7 +115,7 @@ const PaperworkPage = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {beneficiaries.map(b => {
+            {filtered.map(b => {
               const total = getTotal(b)
               return (
                 <tr
@@ -133,10 +149,10 @@ const PaperworkPage = () => {
                 </tr>
               )
             })}
-            {beneficiaries.length === 0 && (
+            {filtered.length === 0 && (
               <tr>
                 <td colSpan={DOCS.length + 3} className="px-6 py-8 text-center text-slate-400">
-                  Sin beneficiarios registrados.
+                  Sin resultados.
                 </td>
               </tr>
             )}
