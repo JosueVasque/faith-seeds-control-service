@@ -73,7 +73,7 @@ const Layout = ({ children, title }) => {
         </nav>
         <div className="px-4 py-4 border-t border-slate-700 space-y-3">
           <a
-            href="http://100.125.146.39:3000"
+            href={import.meta.env.VITE_INVENTORY_URL || 'http://localhost:5173'}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 w-full bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm font-medium px-4 py-2 rounded-lg transition"
