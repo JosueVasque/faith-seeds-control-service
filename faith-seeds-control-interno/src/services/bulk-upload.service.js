@@ -59,7 +59,7 @@ const processFamiliesSheet = async fileBuffer => {
       // Si hay tutor en esta fila, actualizamos el tutor activo
       if (row[1]) {
         lastTutorName = String(row[1]).trim()
-        lastTutorPhone = row[5] ? String(row[5]).trim() : null
+        lastTutorPhone = row[5] ? String(row[5]).trim().substring(0, 50) : null
       }
 
       // Verificar si ya existe

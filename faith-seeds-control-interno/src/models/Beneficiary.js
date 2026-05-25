@@ -18,7 +18,7 @@ const Beneficiary = sequelize.define(
     is_botadero: { type: DataTypes.BOOLEAN, defaultValue: false },
     tutoring_day: { type: DataTypes.STRING(50) },
     tutoring_hour: { type: DataTypes.STRING(50) },
-    phone: { type: DataTypes.STRING(20) },
+    phone: { type: DataTypes.STRING(50) },
   },
   { tableName: 'beneficiaries', timestamps: false }
 )
